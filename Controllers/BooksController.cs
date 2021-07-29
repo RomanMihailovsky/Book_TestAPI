@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,13 +10,17 @@ using System.Threading.Tasks;
 
 namespace Book_TestAPI.Controllers
 {
+
     [Route("api/[controller]")]
     [ApiController]
     public class BooksController : ControllerBase
     {
+        private readonly ILogger _logger;
         DataContext db;
-        public BooksController(DataContext context)
+
+        public BooksController(DataContext context, ILogger<BooksController> logger)
         {
+            _logger = logger;
             db = context;
         }
 
@@ -100,7 +105,7 @@ namespace Book_TestAPI.Controllers
                 return NotFound();
             }
 
-            book.BookStatusId = 1;
+            book.BookStatusId = book.BookStatusId == 2 ? 1 : book.BookStatusId;
             book.UserLogin = HttpContext.User.Identity.Name;
 
             await db.SaveChangesAsync();
