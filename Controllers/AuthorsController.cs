@@ -1,8 +1,10 @@
 ﻿using Book_TestAPI.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -13,8 +15,13 @@ namespace Book_TestAPI.Controllers
     public class AuthorsController : ControllerBase
     {
         DataContext db;
-        public AuthorsController(DataContext context)
+        private readonly ILogger _loggerfile;
+
+        public AuthorsController(DataContext context, ILoggerFactory loggerFactory)
         {
+            loggerFactory.AddFile(Path.Combine(Directory.GetCurrentDirectory(), "logger_bookcontroller.txt"));
+            _loggerfile = loggerFactory.CreateLogger("FileLogger");
+
             db = context;
         }
 
@@ -28,6 +35,8 @@ namespace Book_TestAPI.Controllers
         [HttpGet("{fullname}")]
         public async Task<ActionResult<IEnumerable<Author>>> Get(string fullname)
         {
+            //_loggerfile.LogInformation(" ==== AuthorsController context.Response.StatusCode {0}", HttpContext.Response.StatusCode);
+
             return await db.Authors.Where(x => x.FullName.Contains(fullname)).ToListAsync();
         }
 

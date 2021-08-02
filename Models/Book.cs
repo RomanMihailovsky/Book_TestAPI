@@ -10,8 +10,9 @@ namespace Book_TestAPI.Models
     {
         public int Id { get; set; }
        
-        [Required(ErrorMessage = "Укажите автора книги")]
         public virtual Author Author { get; set; }
+
+        [Required(ErrorMessage = "Укажите автора книги")]
         public int AuthorId { get; set; }
 
         [Required(ErrorMessage = "Укажите название книги")]

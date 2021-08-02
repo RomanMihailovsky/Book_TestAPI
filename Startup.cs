@@ -11,6 +11,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -35,7 +36,8 @@ namespace Book_TestAPI
 
         
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ILogger<Program> logger)
+        public void Configure(IApplicationBuilder app, 
+                                IWebHostEnvironment env)
         {
             if (env.IsDevelopment())
             {
@@ -52,13 +54,6 @@ namespace Book_TestAPI
                 endpoints.MapControllers();
             });
 
-            app.Run(async (context) =>
-            {
-                // пишем на консоль информацию
-                // logger.LogInformation($"Processing request {context.Request.Path}");
-
-                await context.Response.WriteAsync("Books Test");
-            });
         }
     }
 }

@@ -5,7 +5,10 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Net;
+using System.Net.Http;
 using System.Threading.Tasks;
 
 namespace Book_TestAPI.Controllers
@@ -16,18 +19,24 @@ namespace Book_TestAPI.Controllers
     public class BooksController : ControllerBase
     {
         private readonly ILogger _logger;
+        private readonly ILogger _loggerfile;
         DataContext db;
 
-        public BooksController(DataContext context, ILogger<BooksController> logger)
+        public BooksController(DataContext dbcontext, ILogger<BooksController> logger, ILoggerFactory loggerFactory )
         {
+            loggerFactory.AddFile(Path.Combine(Directory.GetCurrentDirectory(), "logger_bookcontroller.txt"));
+            _loggerfile = loggerFactory.CreateLogger("FileLogger");
+
             _logger = logger;
-            db = context;
+            db = dbcontext;
         }
 
         // Получение списка всех книг с полным именем автора.
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Book>>> Get()
         {
+            //_loggerfile.LogInformation(" ==== context.Response.StatusCode {0}", HttpContext.Response.StatusCode);
+
             return await db.Books.ToListAsync();
         }
 
@@ -53,11 +62,16 @@ namespace Book_TestAPI.Controllers
         {
             if (!ModelState.IsValid)
             {
-                return BadRequest();
+                return BadRequest(ModelState);
             }
 
+            Author author = db.Authors.Find(book.AuthorId);
+            book.Author = author;
+
             db.Books.Add(book);
+
             await db.SaveChangesAsync();
+
             return Ok(book);
         }
 
@@ -113,7 +127,7 @@ namespace Book_TestAPI.Controllers
         }
 
 
-        // Удаления книги (Если не найден автор, выводить текст ошибки "не найдена книга")
+        // Удаления книги (Если не найдена книга, выводить текст ошибки "не найдена книга")
         [HttpDelete("{id}")]
         public async Task<ActionResult<Book>> Delete(int id)
         {
